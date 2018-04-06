@@ -6,7 +6,15 @@ from QuestDownloader import QuestDownloader
 from MonsterDownloader import MonsterDownloader
 import random
 from telegram.ext import ConversationHandler
+import requests
 
+
+def stop(bot, update):
+    return ConversationHandler.END
+
+
+def begin_quest(bot, update):
+    return 1
 
 class Game:
     def __init__(self):
@@ -75,28 +83,21 @@ class Game:
         else:
             return "Invalid login or password!", False
 
-    def start_quest(self, bot, update, user_data, args):
+    def start_quest(self, bot, job):
         # Начинает квест
+        user_data = job.context['user_data']
+        update = job.context['update']
         try:
-            name = args[0]
-        except LookupError:
-            update.message.reply_text('Invalid number of arguments!')
+            hero = user_data['hero']
+        except KeyError:
+            update.message.reply_text("Register or login to execute this operation.")
+            user_data['result'] = ConversationHandler.END
         else:
-            try:
-                hero = user_data['hero']
-            except KeyError:
-                update.message.reply_text("Register or login to execute this operation.")
-                return ConversationHandler.END
-            try:
-                mission = self.quests[name]
-            except KeyError:
-                update.message.reply_text("No such quest")
-                return ConversationHandler.END
+            mission = user_data['mission']
             # После проверки входных данных,
             # получаем случайного монстра из
             # всех возможных существ в этом
             # подземелье.
-
             monster = self.monsters[random.choice(mission.monster_pool)]
             print(monster)
             monster = monster.generate_monster(hero.level)
@@ -108,7 +109,7 @@ class Game:
                 hero.level -= 1
                 update.message.reply_text("Defeat!")
                 user_data['hero'] = hero
-                return ConversationHandler.END
+                user_data['result'] = ConversationHandler.END
             else:
                 hero.level += 1
                 user_data['weapon'] = self.weapon_list[mission.calculate_loot()]
@@ -121,8 +122,8 @@ class Game:
                     "Do you want to take it instead of yours?"
                 )
                 user_data['hero'] = hero
-                return 1
-        return ConversationHandler.END
+                user_data['result'] = 1
+        user_data['mission'] = None
 
     def summon_monster(self, name, level):
         return self.monsters[name].generate_monster(level)
@@ -130,6 +131,7 @@ class Game:
     @staticmethod
     def challenge_monster(user_data, *args):
         # Функция сражения с монстром
+        print('da')
         try:
             monster = args[0]
         except LookupError:
@@ -139,7 +141,6 @@ class Game:
         past_hp_monster = monster.hp
         print('2')
         past_hp_hero = hero.get_hp()
-        print('pizdi')
         result = ''
         while True:
             print(result)
@@ -187,6 +188,7 @@ class Game:
                 hero.Magic = weapon
                 user_data['hero'] = hero
                 self.save_data()
+            user_data['weapon'] = None
             return ConversationHandler.END
         else:
             return ConversationHandler.END
@@ -202,16 +204,36 @@ class Game:
         update.message.reply_text('Success!')
         user_data['hero'] = hero
         self.save_data()
+        user_data['weapon'] = None
         return ConversationHandler.END
 
-    def get_character_info(self, user_data, *args):
+    @staticmethod
+    def get_character_info(user_data, *args):
         hero = user_data['hero']
         return hero.call_info()
 
-    def show_pic(self, bot, update, job_queue, chat_data, args):
-        delay = int(args[0])
-        job = job_queue.run_once(self.start_quest(bg), delay, context=update.message.chat_id)
+    def show_pic(self, bot, update, job_queue, chat_data, user_data, args):
+        print('da')
+        delay = 2
+        try:
+            user_data['mission'] = self.quests[args[0]]
+        except LookupError:
+            update.message.reply_text("Invalid argument number.")
+        else:
+            job = job_queue.run_once(self.start_quest, delay, context={'update': update, 'user_data': user_data})
+            chat_data['job'] = job
+            bot.sendPhoto(update.message.chat.id, download_picture(args[0]))
+            return 1
 
-        chat_data['job'] = job
-
-        update.message.reply_text('Вернусь через ' + str(delay) + ' секунд!')
+def download_picture(name_of_the_pic):
+    response_array = requests.get("https://yandex.ru/images/search?text={}&format=soap"
+                                  .format(name_of_the_pic+'+fantasy')).text.split("img_href")
+    element_of_array = response_array[1][3:]
+    img_adr = ""
+    i = 0
+    while True:
+        if element_of_array[i] == '"':
+            break
+        img_adr += element_of_array[i]
+        i += 1
+    return img_adr

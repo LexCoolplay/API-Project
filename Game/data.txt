@@ -1,3 +1,3 @@
 pahom hui 1 Chest Fist Fist Nothing
 name password 1 Chest Fist Fist Nothing
-user abba 4 Chest RustySword Fist Frostbite
+user abba 5 RustyChainmail RustySword Fist Frostbite

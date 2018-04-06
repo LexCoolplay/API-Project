@@ -14,7 +14,7 @@ class Quest:
         if result < 94:
             return random.choice(loot.get_pool(int(self.level)))
         else:
-            if(loot.get_pool(int(self.level)+1)):
+            if loot.get_pool(int(self.level)+1):
                 return random.choice(loot.get_pool(int(self.level)+1))
             else:
                 return random.choice(loot.get_pool(int(self.level)))

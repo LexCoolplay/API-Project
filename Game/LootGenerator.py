@@ -19,7 +19,7 @@ class Treasure:
                     'MagicArrow',
                     'MagicShield',
                     'Frostbite']
-        if level == 2:
+        if level == 5:
             return ['LightningBolt',
                     'ManaBurst',
                     'EarthSpike',

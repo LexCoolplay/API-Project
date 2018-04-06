@@ -12,7 +12,6 @@ class Character:
         self.Magic = self.weapon_list[magic]
         self.name = name
         self.password = password
-        self.differ = 5
 
     def call_level(self):
         return self.level
@@ -40,9 +39,3 @@ class Character:
                   str(self.Weapon_2.name),
                   str(self.Magic.name)]
         return ' '.join(result)
-
-    def get_hp(self):
-        return 100+self.level*10
-
-    def get_damage(self):
-        return 10+(self.call_power()+self.call_level())*4

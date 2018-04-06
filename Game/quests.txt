@@ -1,2 +1,2 @@
-1 OldCastle Rat Pig
-2 ForgottenTower Bandit
+1 OldCastle
+6 ForgottenTower

@@ -3,27 +3,21 @@ from LootGenerator import Treasure
 
 
 class Quest:
-    def __init__(self, level, name):
+    def __init__(self, level, name, monster_pool):
         self.level = level
         self.name = name
-
-    def calculate_performance(self, char_level):
-        differ = 50*(int(char_level)/int(self.level))
-        result = random.randint(1, 100)
-        if differ >= result:
-            return self.calculate_loot()
-        else:
-            return self.calculate_loss()
+        self.monster_pool = monster_pool
 
     def calculate_loot(self):
         loot = Treasure()
         result = random.randint(1, 100)
-        if result < 20:
-            return True
-        elif result < 94:
+        if result < 94:
             return random.choice(loot.get_pool(int(self.level)))
         else:
-            return random.choice(loot.get_pool(int(self.level)+5))
+            if(loot.get_pool(int(self.level)+1)):
+                return random.choice(loot.get_pool(int(self.level)+1))
+            else:
+                return random.choice(loot.get_pool(int(self.level)))
 
     @staticmethod
     def calculate_loss():

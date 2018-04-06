@@ -57,7 +57,7 @@ class Controller:
                 self.cycle.ask_trade(self.cycle.weapon_list[x[1]])
 
             elif line.startswith('/info'):
-                print(self.cycle.Hero.call_info())
+                print(self.cycle.hero.call_info())
 
             elif line.startswith('/quest')\
                     and len(line.split()) == 2:
@@ -70,7 +70,7 @@ class Controller:
                     print(self.cycle.quests[i].call_info())
 
         if name:
-            self.cycle.character_namespace[name] = self.cycle.Hero
+            self.cycle.character_namespace[name] = self.cycle.hero
             print("Saved Successfully")
         self.cycle.save_data()
 

@@ -10,7 +10,7 @@ class QuestDownloader:
         file = open(self.name, 'r')
         for line in file:
             x = line.split()
-            self.dic[x[1]] = Quest(x[0], x[1], x[1:])
+            self.dic[x[1]] = Quest(x[0], x[1], x[2:])
         return self.dic
 
     def clear(self):

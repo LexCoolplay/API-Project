@@ -18,7 +18,12 @@ def telegram_decorator(func):
 
 
 def conversation_decorator(func, **kwargs):
-    if 'pass_args' in kwargs.keys() and kwargs['pass_args']:
+    if 'pass_job_queue' in kwargs.keys() and kwargs['pass_job_queue']:
+        def result_conversation_func(bot, update, job_queue, chat_data, user_data, args):
+            response = func(bot, update, job_queue, chat_data, user_data, args)
+            print(response)
+            return response
+    elif 'pass_args' in kwargs.keys() and kwargs['pass_args']:
         def result_conversation_func(bot, update, user_data, args):
             response = func(bot, update, user_data, args)
             print(response)
@@ -34,6 +39,7 @@ def conversation_decorator(func, **kwargs):
 def stop(bot, update):
     return ConversationHandler.END
 
+
 def start(bot, update):
     update.message.reply_text(
         "I'm a game bot.\n" +
@@ -47,15 +53,6 @@ def start(bot, update):
         "Else you will lose a level."
     )
 
-def show_pic(bot, update, job_queue, chat_data, args):
-    delay = int(args[0])
-    job = job_queue.run_once(task, delay, context=update.message.chat_id)
-
-    chat_data['job'] = job
-
-    update.message.reply_text('Вернусь через ' + str(delay) + ' секунд!')
-
-
 
 def main():
     updater = Updater("546913145:AAEYiORbmyB-yEyWzUIZkR4AGK3EROVpi34")
@@ -63,10 +60,9 @@ def main():
     logic = GameCore.Game()
     logic.load_data()
 
-    print(conversation_decorator(logic.start_quest, pass_args=True, pass_user_data=True))
     quest_conversation = ConversationHandler(
-        entry_points=[CommandHandler('quest', conversation_decorator(logic.start_quest, pass_args=True),
-                                     pass_args=True, pass_user_data=True)],
+        entry_points=[CommandHandler('quest', conversation_decorator(logic.show_pic, pass_job_queue=True),
+                                     pass_job_queue=True, pass_chat_data=True, pass_args=True, pass_user_data=True)],
 
         states={
             1: [MessageHandler(Filters.text,
